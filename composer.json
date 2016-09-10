@@ -1,0 +1,12 @@
+{
+    "name": "mahmoud/downloader",
+    "authors": [
+        {
+            "name": "Mahmoud Tantawy",
+            "email": "mahmoud.tantawy@robustastudio.com"
+        }
+    ],
+    "require": {
+        "shark/simple_html_dom": "dev-master"
+    }
+}
