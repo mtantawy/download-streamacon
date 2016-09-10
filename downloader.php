@@ -28,6 +28,9 @@ $html = new simple_html_dom();
 // Load HTML from a string
 $html->load($response);
 
+$pageTitle = $html->find('title', 0)->innerText();
+$conTitle = sanitizeTitle(str_replace('Watch videos from ', '', $pageTitle));
+
 // extract url of all the talks
 $talks = [];
 foreach ($html->find('div[class=col-md-4 text-center]') as $element) {
@@ -112,7 +115,17 @@ foreach ($vimeoLinks as $referer => $vimeoLink) {
     $videoUrls[$title] = $qualities[0]['url']; // first quality is always the highest
 }
 
-var_dump($videoUrls);
+// check path
+if (!is_dir('talks/' . $conTitle)) {
+    mkdir('talks/' . $conTitle, 0755, true);
+}
+
+// download (or resume downloading of videos)
+// using `wget` as it supports download resume, and provides nice progress bar
+foreach ($videoUrls as $title => $url) {
+    $command = "wget -c '$url' -O 'talks/$conTitle/$title.mp4'";
+    exec($command.' &');
+}
 
 function sanitizeTitle($title)
 {
