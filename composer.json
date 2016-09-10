@@ -1,9 +1,9 @@
 {
-    "name": "mahmoud/downloader",
+    "name": "mahmoud/streamacon-downloader",
     "authors": [
         {
             "name": "Mahmoud Tantawy",
-            "email": "mahmoud.tantawy@robustastudio.com"
+            "email": "me@mtantawy.com"
         }
     ],
     "require": {
