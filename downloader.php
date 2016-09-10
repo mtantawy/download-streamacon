@@ -124,7 +124,7 @@ if (!is_dir('talks/' . $conTitle)) {
 // using `wget` as it supports download resume, and provides nice progress bar
 foreach ($videoUrls as $title => $url) {
     $command = "wget -c '$url' -O 'talks/$conTitle/$title.mp4'";
-    exec($command.' &');
+    exec($command);
 }
 
 function sanitizeTitle($title)
