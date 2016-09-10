@@ -2,8 +2,20 @@
 
 require_once __DIR__ . '/vendor/autoload.php';
 
+// getting args
+$args = getopt('v', ['URL:']);
+
+if (!isset($args['URL'])) {
+    die('Argument "URL" is required!'.PHP_EOL);
+}
+$isVerbose = isset($args['v']);
+$url = trim($args['URL']);
+// remove base URL if exists, and anything before it, to ensure base url is correct and with HTTPS
+$baseUrlPosition = strpos($url, 'streamacon.com');
+$url = str_replace('streamacon.com', '', $url);
+$url = substr($url, $baseUrlPosition, strlen($url) - $baseUrlPosition);
+
 $baseUrl = 'https://streamacon.com/';
-$url = 'video/laracon-us';
 
 // get page with talks
 $response = getPage($baseUrl.$url);
@@ -22,7 +34,9 @@ foreach ($html->find('div[class=col-md-4 text-center]') as $element) {
     $talks[] = $element->children(2)->find('a', 0)->href;
 }
 
-echo 'Found ' . count($talks) . ' talks!'.PHP_EOL;
+if ($isVerbose) {
+    echo 'Found ' . count($talks) . ' talks!'.PHP_EOL;
+}
 
 // extract vimeo links
 $vimeoLinks = [];
@@ -30,7 +44,9 @@ $i = 1; // counting found iframes
 foreach ($talks as $talkUrl) {
     $response = getPage($baseUrl.$talkUrl);
     if (false === $response) {
-        echo 'Talk whose URL is: ' . $baseUrl . $url . ' responded in something other than 200 OK, ignored' . PHP_EOL;
+        if ($isVerbose) {
+            echo 'Talk whose URL is: ' . $baseUrl . $url . ' responded in something other than 200 OK, ignored' . PHP_EOL;
+        }
         continue;
     }
 
@@ -41,11 +57,15 @@ foreach ($talks as $talkUrl) {
 
     // checking is_object to make sure it found the iframe
     if (!is_object($iframe = $html->find('iframe', 0))) {
-        echo 'Talk whose URL is: ' . $baseUrl . $url . ' had no iframe, ignored' . PHP_EOL;
+        if ($isVerbose) {
+            echo 'Talk whose URL is: ' . $baseUrl . $url . ' had no iframe, ignored' . PHP_EOL;
+        }
         continue;
     }
 
-    echo '#' . $i++ . ' - Found Vimeo iframe for talk whose URL is: ' . $baseUrl . $talkUrl.PHP_EOL;
+    if ($isVerbose) {
+        echo '#' . $i++ . ' - Found Vimeo iframe for talk whose URL is: ' . $baseUrl . $talkUrl.PHP_EOL;
+    }
 
     $vimeoLinks[$baseUrl.$talkUrl] = $iframe->src;
 }
@@ -85,7 +105,9 @@ foreach ($vimeoLinks as $referer => $vimeoLink) {
         return $a['quality'] < $b['quality'];
     });
 
-    echo '#' . $i++ . ' - Found Vimeo video at quality: ' . $qualities[0]['quality'] . ' for talk: ' . $title.PHP_EOL;
+    if ($isVerbose) {
+        echo '#' . $i++ . ' - Found Vimeo video at quality: ' . $qualities[0]['quality'] . ' for talk: ' . $title.PHP_EOL;
+    }
 
     $videoUrls[$title] = $qualities[0]['url']; // first quality is always the highest
 }
